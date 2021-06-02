@@ -4,7 +4,7 @@
 
 
 
-- 📕 Note Book: [https://www.yuque.com/books/share/b2c7dd10-e423-4fc3-b180-04e7c23714ab](https://www.yuque.com/hypocrite30/oz1eni)
+- 📕 Note Book: [https://www.yuque.com/books/share/b2c7dd10-e423-4fc3-b180-04e7c23714ab](https://www.yuque.com/books/share/b2c7dd10-e423-4fc3-b180-04e7c23714ab?# 《JVM》)
 
 - 📂 Code Repository: [https://github.com/hypocrite30/JVM-demonstrate](https://github.com/hypocrite30/JVM-demonstrate)
   
