@@ -9,9 +9,9 @@
   - 「[尚硅谷JVM教程](https://www.bilibili.com/video/BV1PJ411n7xZ)」
 
 - 🍬Thanks：
-  - 「https://gitee.com/vectorx/NOTE_JVM」
+  - https://gitee.com/vectorx/NOTE_JVM
     - In directory 「`doc`」
-  - 「https://github.com/TangBean/understanding-the-jvm」
+  - https://github.com/TangBean/understanding-the-jvm
     - In directory 「`doc`」
 
 
