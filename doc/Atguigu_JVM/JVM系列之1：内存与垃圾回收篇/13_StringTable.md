@@ -100,8 +100,8 @@
       char[] ch = {'t', 'e', 's', 't'};
   
       public void change(String str, char ch[]) {
-  //        this.str = "test ok";
-          str = "test ok";
+          // this.str = "test ok"; // this直接改变str的字面量，开辟新的字符串
+          str = "test ok"; // 这里的str只是形参，不会改变成员变量的值
           ch[0] = 'b';
       }
   
@@ -109,9 +109,10 @@
           StringExer ex = new StringExer();
           ex.change(ex.str, ex.ch);
           System.out.println(ex.str);  // good
-          System.out.println(ex.ch);  // best
+          System.out.println(ex.ch);   // best
       }
   }
+  
   ```
 
 ---
@@ -122,11 +123,11 @@
 
   * 使用<font color=blue>**-XX:StringTableSize**</font>可以设置StringTable的长度
 
-  * 在jdk6中StringTable是固定的，就是1009的长度，所以常量池中的字符串过多就会导致效率下降很快。StringTableSize设置没有要求
+  * 在jdk6中StringTable是固定的，就是**1009**的长度，所以常量池中的字符串过多就会导致效率下降很快。StringTableSize设置没有要求
 
-  * 在jdk7中，StringTable的默认长度时60013，StringTableSize设置没有要求
+  * 在jdk7中，StringTable的默认长度时**60013**，StringTableSize设置没有要求
 
-  * jdk8开始，设置StringTable的长度的话，1009是可以设置的最小值。
+  * **jdk8**开始，设置StringTable的长度的话，1009是可以设置的最小值。
 
     <img src="images/246.png" alt="img" style="zoom:100%;" />
 
@@ -137,21 +138,29 @@
     ```java
     public class StringTest2 {
         public static void main(String[] args) {
+            // 测试StringTableSize参数
+            // System.out.println("我来打个酱油");
+            // try {
+            //     Thread.sleep(1000000);
+            // } catch (InterruptedException e) {
+            //     e.printStackTrace();
+            // }
+    
             BufferedReader br = null;
             try {
                 // word.txt是含有10万行，每行长度1~10的txt文件
                 br = new BufferedReader(new FileReader("words.txt"));
                 long start = System.currentTimeMillis();
                 String data;
-                while((data = br.readLine()) != null){
+                while ((data = br.readLine()) != null) {
                     data.intern();   // 如果字符串常量池中没有对应data的字符串的话，则在常量池中生成
                 }
                 long end = System.currentTimeMillis();
-                System.out.println("花费的时间为：" + (end - start));  // 1009:253ms  100009:52ms
+                System.out.println("花费的时间为：" + (end - start));  // 1009:136ms  100009:49ms
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
-                if(br != null){
+                if (br != null) {
                     try {
                         br.close();
                     } catch (IOException e) {
@@ -161,15 +170,17 @@
             }
         }
     }
+    
     ```
 
 ## 2 String的内存分配
 
-* 在Java语言中有8中基本数据类型和一种比较特殊的类型String。这些类型为了使他们再运行过程中更快、更节省内存，都提供了一种常量池的概念。
-* 常量池就类似于一个Java级别提供的缓存。8中基本数据类型的常量池都是系统协调的，<font color=red>**String类型的常量池比较特殊。它的主要使用方法有两种**</font>。
+* 在Java语言中有8种基本数据类型和一种比较特殊的类型String。这些类型为了使他们再运行过程中更快、更节省内存，都提供了一种常量池的概念。
+* 常量池就类似于一个Java系统级别提供的缓存。8中基本数据类型的常量池都是系统协调的，<font color=red>**String类型的常量池比较特殊。它的主要使用方法有两种**</font>。
   * 直接使用双引号声明出来的String对象会直接存储在字符串常量池中。
     * 比如： String info = "Hello";
   * 如果不是用双引号声明的String对象，可以使用String提供的intern()方法。这个后面重点谈。
+* 直接new String()生成的对象会保存在堆中，注：不是在堆中的字符串常量池中（jdk8）
 
 ---
 
@@ -185,7 +196,7 @@
 
     <img src="images/204.png" alt="img" style="zoom:67%;" />
 
-* Java 8元空间，字符串常量在堆。
+* Java 8元空间，字符串常量在堆上。
 
 <img src="images/205.png" alt="img" style="zoom:67%;" />
 
@@ -199,7 +210,7 @@
 
   * 官网：https://www.oracle.com/technetwork/java/javase/jdk7-relnotes-418459.html#jdk7changes
 
-    <img src="images/248.png" alt="img" style="zoom:100%;" />
+<img src="images/248.png" alt="img" style="zoom:100%;" />
 
 * 代码演示OOM：
 
@@ -207,25 +218,27 @@
   /**
    * jdk6中：
    * -XX:PermSize=6m -XX:MaxPermSize=6m -Xms6m -Xmx6m
-   *
+   * <p>
    * jdk8中：
    * -XX:MetaspaceSize=10m -XX:MaxMetaspaceSize=10m -Xms10m -Xmx10m
+   * @Description: 验证jdk6之前StringTable在永久代，jdk7挪到堆内
    */
   public class StringTest3 {
       public static void main(String[] args) {
-          // 使用Set保持着常量池引用，避免full gc回收常量池行为
+          // 使用Set保存着常量池引用，避免full gc回收常量池行为
           Set<String> set = new HashSet<String>();
           // 在short可以取值的范围内足以让6MB的PermSize或heap产生OOM了。
           int i = 0;
-          while(true){
+          while (true) {
               set.add(String.valueOf(i++).intern());
           }
       }
   }
+  
   ```
 
   <img src="images/249.png" alt="img" style="zoom:100%;" />
-
+  
   <img src="images/250.png" alt="img" style="zoom:100%;" />
 
 ## 3 String的基本操作
@@ -274,8 +287,8 @@ class Memory {
 * 字符串拼接操作
   1. 常量与常量的拼接结果在常量池，原理是编译器优化
   2. 常量池中不会存在相同内容的变量。
-  3. 只要其中一个是变量，结果就在堆（堆中的非字符串常量池的位置）中。变量拼接的原理是StringBuilder。
-  4. 如果拼接的结果调用intern()方法，则主动将常量池中还没有的字符串对象放入字符串常量池中，并返回次对象地址。
+  3. 只要其中一个是**变量**，结果就在堆（堆中的非字符串常量池的位置）中。变量拼接的原理是StringBuilder。
+  4. 如果拼接的结果调用intern()方法，则主动将常量池中还没有的字符串对象放入字符串常量池中，并返回此对象地址。
 
 ---
 
@@ -448,7 +461,7 @@ public class StringTest5 {
 
 * 如果不是双引号声明的String对象，可以使用String提供的intern方法：intern方法会从字符串常量池中查询当前字符串是否存在，若不存在就将当前字符串放入常量池中。
   * 比如：String myInfo = new String("Hello").intern();
-* 也就是说，如果在任意字符串上调用String.intern方法，那么返回结果所指向的那个类实例，必须和直接以常量形式的字符串实例完全相同。因此，下列边大师的值必定为true：
+* 也就是说，如果在任意字符串上调用String.intern方法，那么返回结果所指向的那个类实例，必须和直接以常量形式的字符串实例完全相同。因此，下列表达式的值必定为true：
   * ("a" + "b" + "c").intern() == "abc"
 * 通俗点将，Interned String就是确保字符串在内存里只有一份拷贝，这样可以节约内存，加快字符串操作任务的执行速度。注意，这个值会被存放在字符串内部池（String Intern Pool）。
 
@@ -484,35 +497,96 @@ public class StringTest5 {
       }
   }
   ```
+  
+* `new String("ab")` 字节码
+
+  * 0 - 3: new String()
+  * 4: 从StringTable取出 "ab"
+
+>  0 new #2 <java/lang/String>
+>  3 dup
+>  4 ldc #3 <ab>
+>  6 invokespecial #4 <java/lang/String.<init>>
+>  9 astore_1
+> 10 return
+
+- `String str = new String("a") + new String("b");` 字节码
+  - 0 - 3: 由于是含有变量的拼接，所以需要创建`StringBuilder`来使用
+  - 7 - 10: new String()
+  - 11: 从StringTable取出"a"
+  - 19- 22: new String()
+  - 23： 从StringTable取出"b"
+
+>  0 new #2 <java/lang/StringBuilder>
+>  3 dup
+>  4 invokespecial #3 <java/lang/StringBuilder.<init>>
+>  7 new #4 <java/lang/String>
+> 10 dup
+> 11 ldc #5 <a>
+> 13 invokespecial #6 <java/lang/String.<init>>
+> 16 invokevirtual #7 <java/lang/StringBuilder.append>
+> 19 new #4 <java/lang/String>
+> 22 dup
+> 23 ldc #8 <b>
+> 25 invokespecial #6 <java/lang/String.<init>>
+> 28 invokevirtual #7 <java/lang/StringBuilder.append>
+> 31 invokevirtual #9 <java/lang/StringBuilder.toString>
+> 34 astore_1
+> 35 return
+
+- StringBuilder - toString() 字节码
+  - 0 - 3: new String() 又创建一对象
+
+>  0 new #80 <java/lang/String>
+>  3 dup
+>  4 aload_0
+>  5 getfield #234 <java/lang/StringBuilder.value>
+>  8 iconst_0
+>  9 aload_0
+> 10 getfield #233 <java/lang/StringBuilder.count>
+> 13 invokespecial #291 <java/lang/String.<init>>
+> 16 areturn
+
+📌：整个过程没有在字符串常量池中创建**"ab"**
 
 ---
 
-* 一道难度极高的面试题：
+- 一道难度极高的面试题：
 
-  ```java
-  public class StringIntern {
-      public static void main(String[] args) {
-  
-          String s = new String("1");
-          s.intern();  // 调用此方法之前，字符串常量池中已经存在了"1"
-          String s2 = "1";
-          System.out.println(s == s2);  // jdk6：false   jdk7/8：false
-  
-  
-          String s3 = new String("1") + new String("1");  // s3变量记录的地址为：new String("11")
-          // 执行完上一行代码以后，字符串常量池中，是否存在"11"呢？答案：不存在！！
-          s3.intern();  // 在字符串常量池中生成"11"。如何理解：jdk6:创建了一个新的对象"11",也就有新的地址。
-                                               //         jdk7:此时常量中并没有创建"11",而是创建一个指向堆空间中new String("11")的地址
-          String s4 = "11";  // s4变量记录的地址：使用的是上一行代码代码执行时，在常量池中生成的"11"的地址
-          System.out.println(s3 == s4); // jdk6：false  jdk7/8：true
-      }
-  }
-  ```
+```java
+public class StringIntern {
+    public static void main(String[] args) {
 
-  <img src="images/256.png" alt="img" style="zoom:67%;" />
+        String s = new String("1");
+        s.intern();  // 调用此方法之前，字符串常量池中已经存在了"1"
+        String s2 = "1";
+        System.out.println(s == s2);  // jdk6：false   jdk7/8：false
 
-  <img src="images/257.png" alt="img" style="zoom:67%;" />
-  
+
+        String s3 = new String("1") + new String("1");  // s3变量记录的地址为：new String("11")
+        // 执行完上一行代码以后，字符串常量池中，是否存在"11"呢？答案：不存在！！
+        s3.intern();  // 在字符串常量池中生成"11"。如何理解：jdk6:创建了一个新的对象"11",也就有新的地址。
+                                             //         jdk7:此时常量中并没有创建"11",而是创建一个指向堆空间中new String("11")的地址
+        String s4 = "11";  // s4变量记录的地址：使用的是上一行代码代码执行时，在常量池中生成的"11"的地址
+        System.out.println(s3 == s4); // jdk6：false  jdk7/8：true
+    }
+}
+```
+
+- 第一个样例：
+  - s 先在堆上开辟空间，并在StringTable上创建"1"
+  - s.intern()时，"1"已在StringTable，并且返回值没有重新给变量 s「**s = s.intern()**」
+  - s2 指向StringTable 中的"1"
+  - 整个过程，变量s指向的就是堆内的String对象。
+- 第二个样例：
+  - 第一步StringTable没有创建"11"，理由在上一个例子已说明
+  - intern()在jkd6和jdk7操作不同。jdk6把"11"创到永久代中，s3指向堆中String对象，引用当然不同
+  - jdk7把"11"创到堆的StringTable中，但堆中存在一个new String("11")，所以空间最大化，StringTable的"11"实际上指向new String("11")，所以s4最后还是指向s3同一个地址。
+
+<img src="images/256.png" alt="img" style="zoom:67%;" />
+
+<img src="images/257.png" alt="img" style="zoom:67%;" />
+
 * 上一题的变式
 
   ```java
