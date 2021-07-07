@@ -38,7 +38,7 @@
 
   * 那StringBuffer和StringBuilder是否仍无动于衷呢？
 
-    * 修改了
+    * 字符串相关的类如 AbstractStringBuilder、StringBuilder 和 StringBuffer 将更新为使用相同的表示，HotSpot VM 的内在（固有的、内置的）字符串操作也将更新。
     * String-related classes such as `AbstractStringBuilder`, `StringBuilder`, and `StringBuffer` will be updated to <font color=red>**use the same representation**</font>, as will the HotSpot VM's intrinsic（固有的、内置的） string operations.
 
 ---
@@ -47,7 +47,7 @@
 
   * 当对字符串重新赋值时，需要重写指定内存区域赋值，不能使用原有的value进行赋值。
   * 当对现有的字符串进行连接操作时，也需要重新指定内存区域赋值，不能使用原有的value进行赋值。
-  * 当调用String的replace()方法修改指定字符或字符串时，需要重新指定内存区域赋值，不能使用原有的value赋值。
+  * 当调用String的replace()方法修改指定字符或字符串时，需要重新】指定内存区域赋值，不能使用原有的value赋值。
 
 * 通过字面量的方式（区别于new）给一个字符串赋值，此时的字符串值生命在常量池中。
 
@@ -119,7 +119,7 @@
 
 * <font color=red>**字符串常量池中是不会存储相同的内容的字符串的**</font>。
 
-  * String是String Pool（字符串常量池）是一个固定大小的Hashtable，默认值大小长度时1009.如果放进String Pool的String非常多，就会造成Hash冲突严重，从而导致链表会很长，而链表长了以后直接会造成的影响就是当调用String.intern时性能大幅下降。
+  * String是String Pool（字符串常量池）是一个固定大小的**Hashtable**，默认值大小长度时1009.如果放进String Pool的String非常多，就会造成Hash冲突严重，从而导致链表会很长，而链表长了以后直接会造成的影响就是当调用String.intern时性能大幅下降。
 
   * 使用<font color=blue>**-XX:StringTableSize**</font>可以设置StringTable的长度
 
@@ -180,7 +180,7 @@
   * 直接使用双引号声明出来的String对象会直接存储在字符串常量池中。
     * 比如： String info = "Hello";
   * 如果不是用双引号声明的String对象，可以使用String提供的intern()方法。这个后面重点谈。
-* 直接new String()生成的对象会保存在堆中，注：不是在堆中的字符串常量池中（jdk8）
+* 直接new String()生成的对象会保存在**堆**中，注：不是在堆中的字符串常量池中（jdk8）
 
 ---
 
@@ -294,10 +294,9 @@ class Memory {
 
 ```java
 /**
- * 字符串拼接操作
- *
- * @author shkstart  shkstart@126.com
- * @create 2020  0:59
+ * @Description: 字符串拼接操作
+ * @Author: Hypocrite30
+ * @Date: 2021/6/17 18:28
  */
 public class StringTest5 {
     @Test
@@ -473,29 +472,33 @@ public class StringTest5 {
   /**
    * 题目：
    * new String("ab")会创建几个对象？看字节码，就知道是两个。
-   *     一个对象是：new关键字在堆空间创建的
-   *     另一个对象是：字符串常量池中的对象"ab"。 证明：字节码指令：ldc
-   *
-   *
+   * 一个对象是：new关键字在堆空间创建的
+   * 另一个对象是：字符串常量池中的对象"ab"。 证明：字节码指令：ldc
+   * <p>
+   * <p>
    * 思考：
    * new String("a") + new String("b")呢？
-   *  对象1：new StringBuilder()
-   *  对象2： new String("a")
-   *  对象3： 常量池中的"a"
-   *  对象4： new String("b")
-   *  对象5： 常量池中的"b"
-   *
-   *  深入剖析： StringBuilder的toString():
-   *      对象6 ：new String("ab")
-   *       强调一下，toString()的调用，在字符串常量池中，没有生成"ab"
+   * 对象1：new StringBuilder()
+   * 对象2： new String("a")
+   * 对象3： 常量池中的"a"
+   * 对象4： new String("b")
+   * 对象5： 常量池中的"b"
+   * <p>
+   * 深入剖析： StringBuilder的toString():
+   * 对象6 ：new String("ab")
+   * 强调一下，toString()的调用，在字符串常量池中，没有生成"ab"
+   * @Description: 剖析 new String()
+   * @Author: Hypocrite30
+   * @Date: 2021/6/18 14:07
    */
   public class StringNewTest {
       public static void main(String[] args) {
-  //        String str = new String("ab");
+          // String str = new String("ab");
   
           String str = new String("a") + new String("b");
       }
   }
+  
   ```
   
 * `new String("ab")` 字节码
@@ -554,19 +557,28 @@ public class StringTest5 {
 - 一道难度极高的面试题：
 
 ```java
+/**
+ * 如何保证变量s指向的是字符串常量池中的数据呢？
+ * 有两种方式：
+ * 方式一： String s = "shkstart";  // 字面量定义的方式
+ * 方式二： 调用intern()
+ * String s = new String("shkstart").intern();
+ * String s = new StringBuilder("shkstart").toString().intern();
+ * @Description:
+ * @Author: Hypocrite30
+ * @Date: 2021/6/18 21:06
+ */
 public class StringIntern {
     public static void main(String[] args) {
-
         String s = new String("1");
         s.intern();  // 调用此方法之前，字符串常量池中已经存在了"1"
         String s2 = "1";
         System.out.println(s == s2);  // jdk6：false   jdk7/8：false
 
-
         String s3 = new String("1") + new String("1");  // s3变量记录的地址为：new String("11")
         // 执行完上一行代码以后，字符串常量池中，是否存在"11"呢？答案：不存在！！
         s3.intern();  // 在字符串常量池中生成"11"。如何理解：jdk6:创建了一个新的对象"11",也就有新的地址。
-                                             //         jdk7:此时常量中并没有创建"11",而是创建一个指向堆空间中new String("11")的地址
+        //         jdk7:此时常量中并没有创建"11",而是创建一个指向堆空间中new String("11")的地址
         String s4 = "11";  // s4变量记录的地址：使用的是上一行代码代码执行时，在常量池中生成的"11"的地址
         System.out.println(s3 == s4); // jdk6：false  jdk7/8：true
     }
@@ -656,9 +668,8 @@ public class StringIntern {
    * 使用intern()测试执行效率：空间使用上
    * <p>
    * 结论：对于程序中大量存在存在的字符串，尤其其中存在很多重复字符串时，使用intern()可以节省内存空间。
-   *
-   * @author shkstart  shkstart@126.com
-   * @create 2020  21:17
+   * @Author: Hypocrite30
+   * @Date: 2021/6/19 11:14
    */
   public class StringIntern2 {
       static final int MAX_COUNT = 1000 * 10000;
@@ -669,7 +680,7 @@ public class StringIntern {
   
           long start = System.currentTimeMillis();
           for (int i = 0; i < MAX_COUNT; i++) {
-  //            arr[i] = new String(String.valueOf(data[i % data.length]));
+              // arr[i] = new String(String.valueOf(data[i % data.length]));
               arr[i] = new String(String.valueOf(data[i % data.length])).intern();
           }
           long end = System.currentTimeMillis();
@@ -684,21 +695,21 @@ public class StringIntern {
       }
   }
   ```
-
+  
   **未使用intern()结果：**
-
+  
   <img src="images/261.png" alt="img" style="zoom:100%;" />
-
+  
   <img src="images/263.png" alt="img" style="zoom:100%;" />
-
+  
   **使用intern()结果：**
-
+  
   <img src="images/262.png" alt="img" style="zoom:100%;" />
-
+  
   <img src="images/264.png" alt="img" style="zoom:100%;" />
-
+  
   使用intern()会在堆中new对象，同时会在字符串常量池中放入字符串，然后arr[i]指向常量池中的字符串，new出的对象因为无人指向，因此垃圾回收时会被回收，从而达到节省内存的目的。
-
+  
 * 大的网站平台，需要内存中存储大量的字符串。比如社交网站，很多人都存储：北京市、海淀区等信息。这时候如果字符串都调用intern()方法，就会明显降低内存的大小。
 
 ## 6 StringTable的垃圾回收
