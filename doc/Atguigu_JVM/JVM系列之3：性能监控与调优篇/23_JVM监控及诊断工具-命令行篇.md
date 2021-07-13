@@ -1,7 +1,5 @@
 # 第23章 JVM监控及诊断工具-命令行篇
 
-> 来自尚硅谷宋红康老师讲解的JVM：[bilibili链接](https://www.bilibili.com/video/BV1PJ411n7xZ)
-
 ![img](images/第02章：JVM监控及诊断工具-命令行篇.jpg)
 
 ## 1 概述
@@ -59,9 +57,9 @@ public class ScannerTest {
   * -m：输出虚拟机进程启动时传递给主类main()的参数
   * -v：列出虚拟机进程启动时的JVM参数。比如：-Xms100m -Xmx100m是启动程序指定的JVM参数
 
-  说明：以上参数可以综合使用。
+  说 明：以上参数可以综合使用。
 
-  补充：如果某Java进程关闭了默认开启的UsePerfData参数（即使用参数-XX:-UsePerfData），那么jps命令（以及下面介绍的jstat）将无法探知该Java进程
+  补充：如果某Java进程关闭了默认开启的UsePerfData参数（即使用参数`-XX:-UsePerfData`），那么jps命令（以及下面介绍的jstat）将无法探知该Java进程
 
   ---
 
