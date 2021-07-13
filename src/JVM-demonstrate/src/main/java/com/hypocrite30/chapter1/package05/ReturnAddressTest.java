@@ -4,16 +4,14 @@ package com.hypocrite30.chapter1.package05;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Date;
-/**
- * @Description: 测试字节码返回指令区别
- * @Author: Hypocrite30
- * @Date: 2021/6/5 20:37
- */
 
 /**
  * 返回指令包含ireturn（当返回值是boolean、byte、char、short和int类型时使用）、
  * lreturn、freturn、dreturn以及areturn，另外还有一个return指令供声明为void的方法、
  * 实例初始化方法、类和接口的初始化方法使用。
+ * @Description: 测试字节码返回指令区别
+ * @Author: Hypocrite30
+ * @Date: 2021/6/5 20:37
  */
 public class ReturnAddressTest {
     public boolean methodBoolean() {

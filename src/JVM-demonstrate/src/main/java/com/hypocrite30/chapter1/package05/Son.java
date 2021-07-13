@@ -1,13 +1,10 @@
 package com.hypocrite30.chapter1.package05;
 
 /**
+ * invokestatic指令和invokespecial指令调用的方法称为非虚方法
  * @Description: 解析调用中非虚方法、虚方法的测试
  * @Author: Hypocrite30
  * @Date: 2021/6/5 12:39
- */
-
-/**
- * invokestatic指令和invokespecial指令调用的方法称为非虚方法
  */
 class Father {
     public Father() {
@@ -58,7 +55,9 @@ public class Son extends Father {
         super.showCommon();
 
         //invokevirtual
+        //加上super.显示调用，则是invokespecial，本质上也是确定的。
         showFinal();//因为此方法声明有final，不能被子类重写，所以也认为此方法是非虚方法。
+
         //虚方法如下：
         //invokevirtual
         showCommon();
@@ -66,7 +65,7 @@ public class Son extends Father {
 
         MethodInterface in = null;
         //invokeinterface
-        in.methodA();
+        in.methodA(); // 最终调用还是要看接口的实现类重写的方法，无法确定，虚方法。
     }
 
     public void info() {
